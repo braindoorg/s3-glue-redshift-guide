@@ -152,7 +152,7 @@ Glue is an ETL service whos main components are crawlers and jobs. Crawlers *cra
 ### Setup Instructions:
   1. Navigate to Lambda dashbard: https://console.aws.amazon.com/lambda/home
   2. Click **Create function**
-  3. Name function `start-glue-workflow-on-s3-upload` > select `Python 3.6` runtime > expand **Permissions** dropdown and select `lambda_lambda-s3-glue` > *Next*
+  3. Name function `start-glue-workflow-on-s3-upload` > select `Python 3.6` runtime > expand **Permissions** dropdown and select `lambda_lambda-s3-glue` Role > *Next*
   4. In the python code editor, paste in the following code inserting your {{GLUE WORKFLOW NAME}} between the quotations:
   ```
   import boto3
@@ -165,11 +165,11 @@ Glue is an ETL service whos main components are crawlers and jobs. Crawlers *cra
   5. Create your Lambda function trigger
       1. In the function designer, click **+ Add trigger**
       2. Select `S3`
-      3. Select the S3 bucket for which you want the trigger to fire
+      3. Select the S3 bucket for which you want the trigger to fire when objects are created in it
       4. Under Event type, choose `All object create events`
-      5. (optional) Add a Prefix if you want to limit the firing of the trigger to only files in specific folders in a bucket
-      6. (optional) Add a Suffix if you want to limit the firing of the trigger to only specific files types
+      5. (optional) Add a Prefix if you want to limit the firing of the trigger to only files in specific folders (i.e. `daily-exports/`)
+      6. (optional) Add a Suffix if you want to limit the firing of the trigger to only specific files types (i.e. `.csv`)
       7. Click **Add**
-      8. Return to the Lambda function configuration screen > click "Save" on the top right
+      8. Return to the Lambda function configuration screen > click **Save** on the top right
 
-  6. Test your Lambda function (which should run the specified Glue workflow) by navigating to S3 and upload/copy/paste a file that satisfies the function trigger criteria. If everything is configured properly, you should see your crawler running in Glue!
+  6. Test your Lambda function (which should run the specified Glue workflow) by navigating to S3 and upload/copy/paste a file that satisfies the function trigger criteria. If everything is configured properly, you should see your crawler set to the running state in Glue.
