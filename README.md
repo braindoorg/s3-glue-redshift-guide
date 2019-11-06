@@ -1,8 +1,8 @@
-# Daily GA Transaction Data To Redshift: AWS Setup Guide
+# Transform and Import Data from S3 into Redshift on S3 File Upload
 
-The following instructions assume you are logged into AWS with an account full permission to list, modify, and create services.
+The following instructions assume you are logged into AWS with an account full permission to list, modify, and create services. It also assumes you have an AWS region selected where you want to create these services.
 
-## Primary Services Involved:
+## Main Services Involved:
 - IAM
 - S3
 - Glue
@@ -15,39 +15,32 @@ The following instructions assume you are logged into AWS with an account full p
 
 ## IAM
 
-Create an IAM Role for the glue-workflow-initiating lambda function so it has permissions to:
-- detect changes to S3
-- execute a python script that uses the boto3 API to start a Glue workflow
-- write logs to CloudWatch and CloudTrail
+Create a role for our Lamda function so it has permissions to:
+- detect a change to S3
+- execute a python script that runs a Glue workflow
+- write execution/error logs to CloudWatch and CloudTrail
 
 ### Setup Instructions:
   1. Navigate to the IAM dashboard: https://console.aws.amazon.com/iam/home
   2. Click **Roles** in the sidebar
-  3. Click **Create role** button
+  3. Click **Create role**
   4. Under **Choose the service that will use this role**, click **Lambda** > *Next*
   5. Search for, and check two policies: `AWSLambdaBasicExecutionRole` and `AWSGlueServiceRole` > *Next*
-  6. (optional) add a Key/Value pair per your current AWS tag taxonomy > *Next*
-  7. Add Role name `lambda_lambda-s3-glue` > *Create role*
-
-
+  6. Add Role name `lambda_lambda-s3-glue` > *Create role*
 
 ***
 
-
-
 ## S3
 
-S3 will be used as the primary data store for Glue ETL jobs. It will also be used to store temporary, auto-generated files from different Amazon services as they run.
+S3 will be used as the primary data store for data to be processed and uploaded to Redshift. It will also be used to store permenant scripts and temporary files created by Glue.
 
 ### Setup Instructions:
   1. Navigate to the S3 dashboard: https://s3.console.aws.amazon.com/s3/home
   2. Click **+ Create bucket**
-  3. Name your bucket and then click **Next** through all creation screens accepting default values
-  3. Create a new folder inside this bucket to hold daily GA transaction .csv files
+  3. Name your bucket and then keep clicking **Next** through all creation screens accepting default values
+  4. Once the bucket is created, upload one file appropriate for your project for testing purposes.
 
 ***
-
-
 
 ## Redshift
 
@@ -55,13 +48,13 @@ The following describes the process for creating a new Redshift cluster with pro
 
 ### Setup Instructions:
 
-  1. Create a Security Group for the Redshift Cluster so that it can be accessed within it's VPC by Glue.
-      1. Navigate to the Security Group dashboard: https://console.aws.amazon.com/ec2home#SecurityGroups:sort=groupId
+  1. Create a Security Group for a Redshift Cluster so that it is accessible by Glue
+      1. Navigate to the Security Group dashboard: https://console.aws.amazon.com/ec2/home#SecurityGroups:
       2. Click **Create Security Group**
       3. Security group name: `redshift-cluster`
       4. Description: `only allow TCP connections from other services in the VPC`
-      5. Select the VPC where redshift cluster is, or will be, located > *Create*
-      6. In the list of Security Groups, click the security group you just created, and add the following **Inbound* and *Outbound* rules:
+      5. Select the VPC where the services in this guide will live > *Create*
+      6. Select your `redshift-cluser` security group. In the drawer add the following **Inbound** and **Outbound** rules:
       7. **Inbound** rule:
           - **Type**: `All TCP`
           - **Protocol**: `TCP`
@@ -73,35 +66,37 @@ The following describes the process for creating a new Redshift cluster with pro
           - **Port Range**: `All`
           - **Destination**: choose `Anywhere` from dropdown
 
-
-
   2. Create a Redshift Cluster
       1. Navigate to the Redshift dashboard: https://console.aws.amazon.com/redshift/home
       2. Click **Clusters** in the left sidebar
-      3. Click **Launch cluster** button
-      4. Fill in your preference of cluster and database details > *Continue*
+      3. Click **Launch cluster**
+      4. Add a cluster name and database credentials > *Continue*
       5. Select a **Node type**, **Cluster type** and **Number of compute nodes**. For a small test cluster, select:
           - `dc2.large`
           - `Single Node`
           - `1`
-      6. Select the VPC and Security Group from Step #1 > *Continue*
-      7. Review details > *Launch cluster*
+      6. Select the VPC and `redshift-cluser` Security Group > *Continue*
+      7. Review > *Launch cluster*
 
+
+
+Notes:
+- Redshift clusters are fairly expensive; if you created a new Redshift Cluster for the purposes of testing this workflow, remember to delete it and create a snapshot when you are done using it.
 
 ***
 
 ## Glue
 
-Glue is an ETL service whos main components are crawlers and jobs. Crawlers **crawl** data stores (such as S3), automatically determine the schema of contained files, and then organize data into database tables using that schmea. Glue Jobs take in the database tables created by crawlers, transform the data, and load that transformed data into a target.
+Glue is an ETL service whos main components are crawlers and jobs. Crawlers *crawl* data stores (such as S3), determine the schema of contained files, and then create tables with that schema and file data. Glue Jobs take in database tables created by crawlers, transform the data, and load that transformed data into a target.
 
 ### Setup Instructions:
   1. Navigate to the Glue dashboard: https://console.aws.amazon.com/glue/home
 
   2. Create a Glue crawler
-      1. Click **Crawlers** in the left sidebar and then click **Add crawler**
+      1. Click **Crawlers** in the left sidebar > click **Add crawler**
       2. Enter a crawler name > *Next*
       3. Select **Data stores** > *Next*
-      4. Select **S3** as your data store, then click the folder icon next to the **Include path**  field, and select the bucket and/or folder containing the data you want to crawl and include in your Glue job > *Next*
+      4. Select **S3** data store > click the folder icon next to the **Include path** field, and select the bucket containing the data you want to crawl > *Next*
       5. Select **No** > *Next*
       6. Choose **Create an IAM role** and type `import` (full role name: `AWSGlueServiceRole-import`) > *Next*
       7. Select **Run on demand** as the Frequency > *Next*
