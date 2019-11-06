@@ -1,4 +1,4 @@
-# Transform and Import Data from S3 into Redshift on S3 File Upload
+# Creating an Service Pipeline in AWS to Import and Transform Data from S3 into Redshift
 
 The following instructions assume you are logged into AWS with an account full permission to list, modify, and create services. It also assumes you have an AWS region selected where you want to create these services.
 
