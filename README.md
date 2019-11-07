@@ -4,6 +4,7 @@ The following instructions assume you are logged into AWS with an account full p
 
 ## Main Services Involved:
 - IAM
+- VPC and VPC Security Groups
 - S3
 - Glue
 - Redshift
@@ -34,7 +35,7 @@ Create a role for our Lamda function so it has permissions to:
 
 ## VPC and VPC Security Groups
 
-Create a VPC endpoint and VPC Security group so that resources can communicate with each other.
+Add a VPC endpoint and VPC Security group so that services can communicate with one another in the VPC.
 
 ### Setup Instructions:
   1. Create a VPC endpoint
@@ -121,23 +122,26 @@ Glue is an ETL service whos main components are crawlers and jobs. Crawlers *cra
       11. Wait for your crawler to run. When it is done it will return to the **Ready** state
       12. Check to make sure your crawler interpreted your file's schema properly. Click **Tables** under **Databases** in the left sidebar, click the entry, and observe the **Schema** section
 
+  2. Create a Connection (between Glue and your redshift cluster)
+      1. Click **Connection** in the left sidebar > click **Add connection**
+      2. Enter a **Connection name** > select `Amazon Redshift` as the **Connection type** > *Next*
+      3. Select your redshift cluster from the **Cluster** dropdown > (optional) change the **Database name** if what auto-populated is not correct > Enter **Username** and **Password** for database created in Redshift > *Next*
+      4. Review details > *Finish*
 
   3. Create a Glue job
       1. Click **Jobs** in the sidebar > click **Add job**
-      2. Make the following edits to the **Configure the job properties** screen:
+      2. Do the following on the **Configure the job properties** screen:
           - Enter a job name
           - select IAM role `AWSGlueServiceRole-import`
           - under **Advanced properties** enable **Job Bookmark**
           - (optional) adjust **S3 path where the script is stored** and **Temporary directory**. Do not put these files in the same location as where your Glue crawler crawls.
           - click *Next*
-      3. Select a data source (glue crawler database) > *Next*
+      3. Select a data source (glue crawler database/table(s)) > *Next*
       4. Select **Change schema** > *Next*
-      5. Select `Create tables in your data target` > select `JDBC` **Data store** > click **Add connection** button
-      6. In the **Add connection** popup, name your connection `redshift`, chose `Amazon Redshift` **Connection type**, and input details for the redshift cluster > *Add*
-      7. Enter a name for the database to create/modify in Redshift > *Next*
-      8. (optional) prepare your auto-generated transform script in the interface by renaming, reordering, adding, or removing destination columns > *Save job and edit script*
-      9. Click **Save** at the top left of the screen
-      10. When you are ready to kick off your job (which will write your crawled table to Redshift) click **Run job** next to save, or return to the **Jobs** dashboard > click your job > click **Action** button > click **Run Job**. No advanced settings are necessary.
+      5. Select `Create tables in your data target` > select `JDBC` **Data store** > select **Connection** added in step 2 > Enter your Redshift cluster **Database name** > *Next*
+      6. (optional) prepare your python transform script by renaming, reordering, adding, or removing destination columns > *Save job and edit script*
+      7. Click **Save** at the top left of the screen
+      8. When you are ready to kick off your job (which will write your crawled table to Redshift) click **Run job** next to save, or return to the **Jobs** dashboard > click your job > click **Action** button > click **Run Job**. No advanced settings are necessary.
 
 
   4. Create a Glue workflow
