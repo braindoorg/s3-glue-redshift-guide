@@ -1,4 +1,4 @@
-# Creating an Service Pipeline in AWS to Import and Transform Data from S3 into Redshift
+# Creating a Service Pipeline in AWS to Import and Transform Data from S3 into Redshift
 
 The following instructions assumes the user a user is logged into AWS with an account full permission to list, modify, and create services. It also assumes the user has selected the AWS region where he or she wants to create the services.
 
@@ -15,7 +15,7 @@ The following instructions assumes the user a user is logged into AWS with an ac
 
 ## IAM
 
-Create a role for our Lamda function so it has permissions to:
+Create a role for our Lambda function so it has permissions to:
 
 - detect changes to S3
 - execute a python script that uses the AWS Glue API
@@ -54,7 +54,7 @@ Setup Instructions:
       3. Enter **Security group name**: `redshift-cluster`
       4. Enter **Description**: `only allow TCP connections from other services in the VPC`
       5. Select the VPC where other services are/will-be located > *Create*
-      6. Select the `redshift-cluser` security group. In the drawer add the following **Inbound** rule:
+      6. Select the `redshift-cluster` security group. In the drawer add the following **Inbound** rule:
       7. **Inbound** rule:
           - **Type**: `All TCP`
           - **Protocol**: `TCP`
@@ -63,7 +63,7 @@ Setup Instructions:
 
 ## S3
 
-S3 will be used as the primary data store for data to be processed and uploaded to Redshift. It will also be used to store permenant scripts and temporary files created by Glue.
+S3 will be used as the primary data store for data to be processed and uploaded to Redshift. It will also be used to store permanent scripts and temporary files created by Glue.
 
 Setup Instructions:
 
@@ -92,7 +92,7 @@ Setup Instructions:
           - `dc2.large`
           - `Single Node`
           - `1`
-      6. Select the appropriate VPC and `redshift-cluser` **VPC security group** > *Continue*
+      6. Select the appropriate VPC and `redshift-cluster` **VPC security group** > *Continue*
       7. Review details > *Launch cluster*
 
 Note: Redshift clusters are fairly expensive; if you created a new Redshift Cluster for the purposes of testing this workflow, remember to delete it and create a snapshot as soon as you are done using it.
@@ -101,7 +101,7 @@ Note: Redshift clusters are fairly expensive; if you created a new Redshift Clus
 
 ## Glue
 
-Glue is an ETL service whos main components are crawlers and jobs. Crawlers scan data stores and determine the schema of the data. Glue Jobs extract and transform data from data stores (using crawl-determined metadata and custom scripts) and then load that transformed data into a target data store.
+Glue is an ETL service whose main components are crawlers and jobs. Crawlers scan data stores and determine the schema of the data. Glue Jobs extract and transform data from data stores (using crawl-determined metadata and custom scripts) and then load that transformed data into a target data store.
 
 Setup Instructions:
 
@@ -173,7 +173,7 @@ Create a Lambda function that runs a Glue workflow when a file is uploaded to S3
 
 Setup Instructions:
 
-  1. Navigate to Lambda dashbard: <https://console.aws.amazon.com/lambda/home>
+  1. Navigate to Lambda dashboard: <https://console.aws.amazon.com/lambda/home>
   2. Click **Create function**
   3. Name function `start-glue-workflow-on-s3-upload` > select `Python 3.7` runtime > expand **Permissions** dropdown > click `Use an existing role` > select `lambda_lambda-s3-glue` Role > *Create function*
   4. In the python code editor, paste in the following code inserting your {{GLUE WORKFLOW NAME}} between the quotations > *Save*
