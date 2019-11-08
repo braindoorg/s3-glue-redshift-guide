@@ -1,8 +1,8 @@
 # Creating an Service Pipeline in AWS to Import and Transform Data from S3 into Redshift
 
-The following instructions assume you are logged into AWS with an account full permission to list, modify, and create services. It also assumes you have an AWS region selected where you want to create these services.
+The following instructions assumes the user a user is logged into AWS with an account full permission to list, modify, and create services. It also assumes the user has selected the AWS region where he or she wants to create the services.
 
-## Main Services Involved:
+## Main Services Involved
 
 - IAM
 - VPC and VPC Security Groups
@@ -70,7 +70,7 @@ Setup Instructions:
   1. Navigate to the S3 dashboard: <https://s3.console.aws.amazon.com/s3/home>
   2. Click **+ Create bucket**
   3. Enter a **Bucket name** and then keep clicking **Next** through all creation screens accepting default values
-  4. Once the bucket is created, upload one file appropriate for your project for testing purposes
+  4. Once the bucket is created, upload one file/folder appropriate for your project
 
 Note: You may choose to store files within folders instead of keeping them at the root of the S3 bucket. If you do, you need to incorporate this in later settings that reference the S3 bucket configuration.
 
@@ -101,7 +101,7 @@ Note: Redshift clusters are fairly expensive; if you created a new Redshift Clus
 
 ## Glue
 
-Glue is an ETL service whos main components are crawlers and jobs. Crawlers scan data stores and determine the schema of the data. Glue Jobs extract and transform data from data stores (using crawler schema metadata and custom scripts) and then load that transformed data into a target data store.
+Glue is an ETL service whos main components are crawlers and jobs. Crawlers scan data stores and determine the schema of the data. Glue Jobs extract and transform data from data stores (using crawl-determined metadata and custom scripts) and then load that transformed data into a target data store.
 
 Setup Instructions:
 
@@ -110,7 +110,7 @@ Setup Instructions:
       2. Click **Crawlers** in the left sidebar > click **Add crawler**
       3. Enter a **Crawler name** > *Next*
       4. Select **Data stores** > *Next*
-      5. Select **S3** data store > click the folder icon next to the **Include path** > select the bucket/folder containing the data you want to crawl > *Next*
+      5. Select **S3** data store > click the folder icon next to the **Include path** > select the bucket/folder *containing* the data you want to crawl > *Next*
       6. Select **No** > *Next*
       7. Choose **Create an IAM role** and type `import` (full role name: **AWSGlueServiceRole-import**) > *Next*
       8. Select **Run on demand** as the **Frequency** > *Next*
@@ -141,7 +141,7 @@ Setup Instructions:
       2. **Configure the job properties** screen:
           - Enter a job name
           - select IAM role `AWSGlueServiceRole-import`
-          - under **Advanced properties** `enable` **Job Bookmark**
+          - under **Advanced properties**, `enable` **Job Bookmark**
           - (optional) adjust **S3 path where the script is stored** and **Temporary directory**. Do not put these files in the same location as where your Glue crawler crawls.
           - click *Next*
       3. Select a data source (glue crawler database/table(s)) > *Next*
@@ -175,7 +175,7 @@ Setup Instructions:
 
   1. Navigate to Lambda dashbard: <https://console.aws.amazon.com/lambda/home>
   2. Click **Create function**
-  3. Name function `start-glue-job-on-s3-upload` > select `Python 3.7` runtime > expand **Permissions** dropdown > click `Use an existing role` > select `lambda_lambda-s3-glue` Role > *Create function*
+  3. Name function `start-glue-workflow-on-s3-upload` > select `Python 3.7` runtime > expand **Permissions** dropdown > click `Use an existing role` > select `lambda_lambda-s3-glue` Role > *Create function*
   4. In the python code editor, paste in the following code inserting your {{GLUE WORKFLOW NAME}} between the quotations > *Save*
 
 ```python
