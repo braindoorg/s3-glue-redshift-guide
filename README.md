@@ -114,7 +114,7 @@ Setup Instructions:
       6. Select **No** > *Next*
       7. Choose **Create an IAM role** and type `import` (full role name: **AWSGlueServiceRole-import**) > *Next*
       8. Select **Run on demand** as the **Frequency** > *Next*
-      9. Click **Add database**, enter a **Database name** > **Create** > *Next*
+      9. Click **Add database**, enter a **Database name** > **Create** > check `Create a single schema for each s3 path` > Expand **Configuration options** > check `Add new columns only` > check `Update all new and existing partitions with metadata from the table.` > *Next*
       10. Confirm details > *Finish*
       11. Run your crawler. Click **Run It Now ?** in the popup or highlight your crawler in the crawler dashboard > **Run crawler**.
 
@@ -129,8 +129,9 @@ Setup Instructions:
               - `quoteChar` : `"`
               - `separatorChar` : `,`
           - click **Apply**
+      4. Re-run your crawler to update table metadata per the configuration above
 
-  3. Create a Connection (between Glue and your redshift cluster)
+  3. Create a Connection
       1. Click **Connection** in the left sidebar > click **Add connection**
       2. Enter a **Connection name** > select `Amazon Redshift` as the **Connection type** > *Next*
       3. Select your redshift cluster from the **Cluster** dropdown > (optional) change the **Database name** if what auto-populated is not correct > Enter **Username** and **Password** for database created in Redshift > *Next*
